@@ -6,6 +6,7 @@ The data set is in the module named conv_utils.
 By import this, you can easily load in the data you need.
 
 
+
 PROBLEM: local optima!!! if accuracy is 0.16666, it must have fallen into a local optima!!!
 
 '''
@@ -18,8 +19,8 @@ import h5py
 import scipy
 from PIL import Image
 from scipy import ndimage
-from tensorflow.python.framework import ops
-from cnn_utils import *
+#from tensorflow.python.framework import ops
+from cnn_utils_DLCoursera import *
 
 ' import data '
 X_train_orig, Y_train_orig, X_test_orig, Y_test_orig, classes = load_dataset()
