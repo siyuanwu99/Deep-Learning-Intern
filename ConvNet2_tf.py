@@ -7,11 +7,11 @@ By import this, you can easily load in the data you need.
 
 
 
-PROBLEM: local optima!!! if accuracy is 0.16666, it must have fallen into a local optima!!!
-
+This model can be saved into disk.
+ 
 '''
 
-import tensorflow as tf
+import tensorflow as t
 import matplotlib.pylab as plt
 import math
 import numpy as np
@@ -63,6 +63,8 @@ def cnn_modul(X_train,Y_train,X_test,Y_test,
     (m,n_y) = np.shape(Y_train)
     costs_curv = []
 
+    
+    tf.set_random_seed(1)
 
     'Placeholder'
     X = tf.placeholder(tf.float32, [None,n_H,n_W,n_C], 'X')
@@ -70,11 +72,11 @@ def cnn_modul(X_train,Y_train,X_test,Y_test,
 
 
     'Initialize filter'
-    W1 = tf.Variable(tf.random_normal([4,4,3,8], stddev=tf.sqrt(2/m)), name='W1', dtype=tf.float32)
-    W2 = tf.Variable(tf.random_normal([2,2,8,16], stddev=tf.sqrt(2/m)), name='W2', dtype=tf.float32)
-    W3 = tf.Variable(tf.random_normal([64,16], stddev=tf.sqrt(2/m)), name='W3', dtype=tf.float32)
-    W4 = tf.Variable(tf.random_normal([16,6], stddev=tf.sqrt(2/m)), name='W4', dtype=tf.float32)
-    
+    W1 = tf.Variable(tf.random_normal([4,4,3,8]), name='W1', dtype=tf.float32)
+    W2 = tf.Variable(tf.random_normal([2,2,8,16]), name='W2', dtype=tf.float32)
+    W3 = tf.Variable(tf.random_normal([64,16]), name='W3', dtype=tf.float32)
+    W4 = tf.Variable(tf.random_normal([16,6], stddev=tf.sqrt(1/4096)), name='W4', dtype=tf.float32)
+
 
     
     parameters = {  'W1': W1,
@@ -95,7 +97,7 @@ def cnn_modul(X_train,Y_train,X_test,Y_test,
 
     Z3 = tf.layers.flatten(Z2)# (n,64)
     A3 = tf.matmul(Z3,W3)
-    Z4 = tf.nn.relu(A3)
+    Z4 = tf.nn.leaky_relu(A3, 0.1)
     A4 = tf.matmul(Z4,W4)
     pred = tf.nn.relu(A4)
     #pred = tf.contrib.layers.fully_connected(Z3,6,activation_fn = None)
@@ -114,12 +116,18 @@ def cnn_modul(X_train,Y_train,X_test,Y_test,
     init = tf.global_variables_initializer()
 
 
+    'saver class'
+    saver = tf.train.Saver()
+
+
     'Allon - sy'
     with tf.Session() as sess :
                 
         seed = 1
         sess.run(init)
 
+        saver.save(sess,"./my-test-model",global_step=0)
+        
         #training loop
         for epoch in range(num_epoches):
             minibatch_cost = 0
@@ -132,12 +140,15 @@ def cnn_modul(X_train,Y_train,X_test,Y_test,
                 
                 minibatch_cost += cost_temp / minibatch_size
 
-            if epoch % 5 == 0 and epoch > 4:
+            if epoch % 10 == 0 and epoch > 4:
                 print("Cost after epoch %i : %f"%(epoch,minibatch_cost))
             elif epoch % 1 == 0:
                 costs_curv.append(minibatch_cost)
-      
 
+        'Save the model'
+        saver.save(sess,'./my-test-model',global_step=170)
+        print("Successfully saved the model!!")
+      
         'Calculate the correct predictions'
         correct_prediction = tf.equal(tf.argmax(pred, 1), tf.argmax(Y, 1))
             
@@ -157,10 +168,12 @@ def cnn_modul(X_train,Y_train,X_test,Y_test,
         plt.title("Learning rate =" + str(learning_rate))
         plt.show()         
         
-        
-        return train_accuracy, test_accuracy
+        par = sess.run(parameters)
+        print(par)
+        return par
 
 
 
 
-print(cnn_modul(X_train,Y_train,X_test,Y_test,0.008,200,64))
+par = cnn_modul(X_train,Y_train,X_test,Y_test,0.01,170,64)
+
