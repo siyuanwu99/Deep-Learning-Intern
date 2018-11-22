@@ -76,6 +76,8 @@ def cnn_modul(X_train,Y_train,X_test,Y_test,
     W2 = tf.Variable(tf.random_normal([2,2,8,16]), name='W2', dtype=tf.float32)
     W3 = tf.Variable(tf.random_normal([64,16]), name='W3', dtype=tf.float32)
     W4 = tf.Variable(tf.random_normal([16,6], stddev=tf.sqrt(1/4096)), name='W4', dtype=tf.float32)
+    #b3 = tf.Variable(tf.random_normal([1,16]),name='b3',dtype=tf.float32)
+    #b4 = tf.Variable(tf.random_normal([1,6]),name='b4',dtype=tf.float32)
 
 
     
@@ -95,12 +97,12 @@ def cnn_modul(X_train,Y_train,X_test,Y_test,
     B2 = tf.nn.relu(A2)
     Z2 = tf.nn.max_pool(B2, [1,4,4,1], [1,4,4,1], padding='SAME')
 
-    Z3 = tf.layers.flatten(Z2)# (n,64)
-    A3 = tf.matmul(Z3,W3)
+    Z2 = tf.layers.flatten(Z2)
+    A3 = tf.matmul(Z2,W3)
     Z4 = tf.nn.leaky_relu(A3, 0.1)
     A4 = tf.matmul(Z4,W4)
     pred = tf.nn.relu(A4)
-    #pred = tf.contrib.layers.fully_connected(Z3,6,activation_fn = None)
+   
    
 
     'Cost'
